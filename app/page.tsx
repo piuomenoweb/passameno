@@ -104,6 +104,13 @@ export default function Home() {
     setShowForm(true)
   }
 
+  const handleCall = (contact: Contact, phoneNumber: PhoneNumber) => {
+    // Chiama direttamente il numero
+    const cleanPhone = phoneNumber.number.replace(/\D/g, '')
+    const phoneToCall = cleanPhone.startsWith('39') ? `+${cleanPhone}` : `+39${cleanPhone}`
+    window.location.href = `tel:${phoneToCall}`
+  }
+
   const handleShare = (contact: Contact) => {
     setContactToShare(contact)
     setShowShareModal(true)
@@ -194,7 +201,7 @@ export default function Home() {
           loading={loading}
           onEdit={handleEdit}
           onDelete={(contact) => handleDelete(contact)}
-          onShare={handleShare}
+          onCall={handleCall}
           onForward={handleForward}
         />
       </main>

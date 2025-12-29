@@ -40,3 +40,16 @@ export function cleanPhoneForWhatsApp(phone: string): string {
   return phone.replace(/\D/g, '')
 }
 
+export function cleanPhoneForCall(phone: string): string {
+  // Rimuovi tutto tranne i numeri e mantieni il prefisso +39
+  let cleaned = phone.replace(/\D/g, '')
+  
+  // Se inizia con 39, aggiungi +
+  if (cleaned.startsWith('39')) {
+    return '+' + cleaned
+  }
+  
+  // Altrimenti aggiungi +39
+  return '+39' + cleaned
+}
+

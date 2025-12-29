@@ -3,16 +3,18 @@
 import { Contact } from '@/types/contact'
 import ContactCard from './ContactCard'
 
+import { PhoneNumber } from '@/types/contact'
+
 interface ContactListProps {
   contacts: Contact[]
   loading: boolean
   onEdit: (contact: Contact) => void
   onDelete: (contact: Contact) => void
-  onShare: (contact: Contact) => void
-  onForward: (contact: Contact, phoneNumber: any) => void
+  onCall: (contact: Contact, phoneNumber: PhoneNumber) => void
+  onForward: (contact: Contact, phoneNumber: PhoneNumber) => void
 }
 
-export default function ContactList({ contacts, loading, onEdit, onDelete, onShare, onForward }: ContactListProps) {
+export default function ContactList({ contacts, loading, onEdit, onDelete, onCall, onForward }: ContactListProps) {
   if (loading) {
     return (
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
@@ -45,7 +47,7 @@ export default function ContactList({ contacts, loading, onEdit, onDelete, onSha
           contact={contact}
           onEdit={onEdit}
           onDelete={onDelete}
-          onShare={onShare}
+          onCall={onCall}
           onForward={onForward}
         />
       ))}
