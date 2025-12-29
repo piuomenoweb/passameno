@@ -12,11 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" className="light">
-      <body className="font-display bg-background-light text-slate-800 min-h-screen relative overflow-x-hidden selection:bg-primary/30">
+    <html lang="it" suppressHydrationWarning>
+      <body className="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen relative overflow-x-hidden selection:bg-primary/30 transition-colors duration-300">
         {children}
       </body>
     </html>
   );
 }
-

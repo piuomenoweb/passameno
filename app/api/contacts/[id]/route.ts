@@ -23,7 +23,13 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ data })
+    // Trasforma per compatibilità
+    const transformed = {
+      ...data,
+      phones: data.phones || (data.phone ? [{ number: data.phone, label: 'Principale' }] : [])
+    }
+
+    return NextResponse.json({ data: transformed })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -41,35 +47,41 @@ export async function PUT(
     const supabase = createServerClient()
     const body: ContactFormData = await request.json()
 
-    if (!body.name || !body.phone) {
+    if (!body.name || !body.phones || body.phones.length === 0) {
       return NextResponse.json(
-        { error: 'Nome e telefono sono obbligatori' },
+        { error: 'Nome e almeno un numero telefonico sono obbligatori' },
         { status: 400 }
       )
     }
 
     // Verifica duplicati (escludendo il record corrente)
-    const { data: existing } = await supabase
-      .from('contacts')
-      .select('id')
-      .eq('phone', body.phone)
-      .neq('id', params.id)
-      .single()
+    const primaryPhone = body.phones[0]?.number
+    if (primaryPhone) {
+      const { data: existing } = await supabase
+        .from('contacts')
+        .select('id')
+        .neq('id', params.id)
+        .or(`phone.eq.${primaryPhone},phones.cs.[{"number":"${primaryPhone}"}]`)
+        .limit(1)
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Un contatto con questo numero esiste già' },
-        { status: 409 }
-      )
+      if (existing && existing.length > 0) {
+        return NextResponse.json(
+          { error: 'Un contatto con questo numero esiste già' },
+          { status: 409 }
+        )
+      }
     }
 
     const { data, error } = await supabase
       .from('contacts')
       .update({
         name: body.name,
-        phone: body.phone,
+        phones: body.phones || [],
+        phone: body.phones?.[0]?.number || null, // Retrocompatibilità
         email: body.email || null,
         category: body.category || 'altro',
+        city: body.city || null,
+        whatsapp_username: body.whatsapp_username || null,
         notes: body.notes || null,
         tags: body.tags || [],
         favorite: body.favorite || false
@@ -80,7 +92,13 @@ export async function PUT(
 
     if (error) throw error
 
-    return NextResponse.json({ data })
+    // Trasforma per compatibilità
+    const transformed = {
+      ...data,
+      phones: data.phones || (data.phone ? [{ number: data.phone, label: 'Principale' }] : [])
+    }
+
+    return NextResponse.json({ data: transformed })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -111,4 +129,3 @@ export async function DELETE(
     )
   }
 }
-

@@ -1,20 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Contact } from '@/types/contact'
+import { Contact, PhoneNumber } from '@/types/contact'
 import { getShareContactMessage } from '@/lib/utils/messages'
 import { cleanPhoneForWhatsApp } from '@/lib/utils/phone'
 
-interface ShareModalProps {
-  contactToShare: Contact | null
+interface ForwardModalProps {
+  contact: Contact | null
+  phoneNumber: PhoneNumber
   contacts: Contact[]
   onClose: () => void
 }
 
-export default function ShareModal({ contactToShare, contacts, onClose }: ShareModalProps) {
+export default function ForwardModal({ contact, phoneNumber, contacts, onClose }: ForwardModalProps) {
   const [search, setSearch] = useState('')
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>(contacts)
-  const [selectedPhoneIndex, setSelectedPhoneIndex] = useState(0)
 
   useEffect(() => {
     if (search) {
@@ -29,13 +29,10 @@ export default function ShareModal({ contactToShare, contacts, onClose }: ShareM
     }
   }, [search, contacts])
 
-  const handleShare = (recipient: Contact) => {
-    if (!contactToShare) return
+  const handleForward = (recipient: Contact) => {
+    if (!contact) return
 
-    const phoneToShare = contactToShare.phones?.[selectedPhoneIndex] || contactToShare.phones?.[0]
-    if (!phoneToShare) return
-
-    const message = getShareContactMessage(contactToShare, phoneToShare)
+    const message = getShareContactMessage(contact, phoneNumber)
     const recipientPhone = recipient.phones?.[0]?.number || ''
     const cleanPhone = cleanPhoneForWhatsApp(recipientPhone)
     const encodedMessage = encodeURIComponent(message)
@@ -45,9 +42,7 @@ export default function ShareModal({ contactToShare, contacts, onClose }: ShareM
     onClose()
   }
 
-  if (!contactToShare) return null
-
-  const phones = contactToShare.phones || []
+  if (!contact) return null
 
   return (
     <div className="fixed inset-0 z-40 bg-slate-200/40 backdrop-blur-[20px] transition-opacity duration-300 flex items-center justify-center p-4">
@@ -62,36 +57,14 @@ export default function ShareModal({ contactToShare, contacts, onClose }: ShareM
 
         <div className="p-6 pt-8 text-center flex flex-col items-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20 shadow-[0_0_15px_rgba(6,123,249,0.15)]">
-            <span className="material-symbols-outlined text-[32px]">share</span>
+            <span className="material-symbols-outlined text-[32px]">forward</span>
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-            Condividi Contatto
+            Inoltra Numero
           </h2>
-          <p className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 px-4 mb-4">
-            Seleziona il destinatario per <strong>{contactToShare.name}</strong>
+          <p className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 px-4">
+            Seleziona il destinatario per inoltrare il numero di <strong>{contact.name}</strong>
           </p>
-          
-          {/* Selezione numero se ce ne sono più di uno */}
-          {phones.length > 1 && (
-            <div className="w-full mb-4">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Seleziona numero:</label>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {phones.map((phone, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedPhoneIndex(index)}
-                    className={`px-3 py-1 rounded-lg text-sm transition-all ${
-                      selectedPhoneIndex === index
-                        ? 'bg-primary text-white'
-                        : 'glass-btn-secondary text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {phone.label || `Numero ${index + 1}`}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="p-6 pt-0">
@@ -116,7 +89,7 @@ export default function ShareModal({ contactToShare, contacts, onClose }: ShareM
               filteredContacts.map((contact) => (
                 <button
                   key={contact.id}
-                  onClick={() => handleShare(contact)}
+                  onClick={() => handleForward(contact)}
                   className="w-full glass-btn-secondary rounded-xl p-4 hover:bg-white/60 transition-all duration-150 text-left group"
                 >
                   <div className="flex items-center justify-between">
@@ -140,3 +113,4 @@ export default function ShareModal({ contactToShare, contacts, onClose }: ShareM
     </div>
   )
 }
+

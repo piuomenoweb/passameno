@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const category = searchParams.get('category')
     const favorite = searchParams.get('favorite')
+    const city = searchParams.get('city')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = (page - 1) * limit
@@ -20,9 +21,9 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
 
-    // Filtro ricerca
+    // Filtro ricerca (su name, city, email, e numeri telefonici in phones)
     if (search) {
-      query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%,email.ilike.%${search}%`)
+      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,city.ilike.%${search}%`)
     }
 
     // Filtro categoria
@@ -35,6 +36,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('favorite', true)
     }
 
+    // Filtro città
+    if (city) {
+      query = query.eq('city', city)
+    }
+
     // Paginazione
     query = query.range(offset, offset + limit - 1)
 
@@ -42,8 +48,26 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
+    // Trasforma i dati per compatibilità: se c'è phone (vecchio formato), convertilo in phones
+    const transformedData = (data || []).map((contact: any) => {
+      if (contact.phones && Array.isArray(contact.phones) && contact.phones.length > 0) {
+        return contact
+      }
+      // Retrocompatibilità: se c'è phone ma non phones, crea array phones
+      if (contact.phone) {
+        return {
+          ...contact,
+          phones: [{ number: contact.phone, label: 'Principale' }]
+        }
+      }
+      return {
+        ...contact,
+        phones: []
+      }
+    })
+
     return NextResponse.json({
-      data: data || [],
+      data: transformedData,
       pagination: {
         page,
         limit,
@@ -66,34 +90,41 @@ export async function POST(request: NextRequest) {
     const body: ContactFormData = await request.json()
 
     // Validazione base
-    if (!body.name || !body.phone) {
+    if (!body.name || !body.phones || body.phones.length === 0) {
       return NextResponse.json(
-        { error: 'Nome e telefono sono obbligatori' },
+        { error: 'Nome e almeno un numero telefonico sono obbligatori' },
         { status: 400 }
       )
     }
 
-    // Verifica duplicati
-    const { data: existing } = await supabase
-      .from('contacts')
-      .select('id')
-      .eq('phone', body.phone)
-      .single()
+    // Verifica duplicati (controlla tutti i numeri)
+    const primaryPhone = body.phones[0]?.number
+    if (primaryPhone) {
+      // Cerca in phones array o in phone (retrocompatibilità)
+      const { data: existing } = await supabase
+        .from('contacts')
+        .select('id')
+        .or(`phone.eq.${primaryPhone},phones.cs.[{"number":"${primaryPhone}"}]`)
+        .limit(1)
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Un contatto con questo numero esiste già' },
-        { status: 409 }
-      )
+      if (existing && existing.length > 0) {
+        return NextResponse.json(
+          { error: 'Un contatto con questo numero esiste già' },
+          { status: 409 }
+        )
+      }
     }
 
     const { data, error } = await supabase
       .from('contacts')
       .insert({
         name: body.name,
-        phone: body.phone,
+        phones: body.phones || [],
+        phone: body.phones?.[0]?.number || null, // Mantieni per retrocompatibilità
         email: body.email || null,
         category: body.category || 'altro',
+        city: body.city || null,
+        whatsapp_username: body.whatsapp_username || null,
         notes: body.notes || null,
         tags: body.tags || [],
         favorite: body.favorite || false
@@ -103,7 +134,13 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error
 
-    return NextResponse.json({ data }, { status: 201 })
+    // Trasforma per compatibilità
+    const transformed = {
+      ...data,
+      phones: data.phones || (data.phone ? [{ number: data.phone, label: 'Principale' }] : [])
+    }
+
+    return NextResponse.json({ data: transformed }, { status: 201 })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },
@@ -111,4 +148,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

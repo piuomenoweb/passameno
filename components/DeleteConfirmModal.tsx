@@ -24,12 +24,12 @@ export default function DeleteConfirmModal({ contact, onConfirm, onCancel }: Del
           </div>
 
           {/* Headline */}
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
             Eliminare contatto?
           </h2>
 
           {/* Body Text */}
-          <p className="text-[15px] leading-relaxed text-slate-600 px-4">
+          <p className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-400 px-4">
             Questa azione non può essere annullata. <br/>Il contatto <strong>{contact.name}</strong> verrà rimosso permanentemente.
           </p>
         </div>
@@ -39,7 +39,7 @@ export default function DeleteConfirmModal({ contact, onConfirm, onCancel }: Del
           {/* Cancel Button */}
           <button
             onClick={onCancel}
-            className="w-full sm:w-1/2 h-11 flex items-center justify-center rounded-xl text-[15px] font-semibold text-slate-700 liquid-glass-btn hover:bg-white/60 active:scale-[0.98] transition-all"
+            className="w-full sm:w-1/2 h-11 flex items-center justify-center rounded-xl text-[15px] font-semibold text-slate-700 dark:text-slate-300 liquid-glass-btn hover:bg-white/60 dark:hover:bg-white/10 active:scale-[0.98] transition-all"
           >
             Annulla
           </button>
