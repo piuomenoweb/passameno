@@ -8,8 +8,9 @@ import FilterBar from '@/components/FilterBar'
 import ShareModal from '@/components/ShareModal'
 import ForwardModal from '@/components/ForwardModal'
 import DeleteConfirmModal from '@/components/DeleteConfirmModal'
+import ImportModal from '@/components/ImportModal'
 import ThemeToggle from '@/components/ThemeToggle'
-import { PhoneNumber } from '@/types/contact'
+import { PhoneNumber, ContactFormData } from '@/types/contact'
 
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -23,6 +24,7 @@ export default function Home() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showForwardModal, setShowForwardModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [editingContact, setEditingContact] = useState<Contact | null>(null)
   const [contactToShare, setContactToShare] = useState<Contact | null>(null)
   const [contactToForward, setContactToForward] = useState<Contact | null>(null)
@@ -129,6 +131,13 @@ export default function Home() {
     fetchCities() // Aggiorna lista città dopo creazione/modifica
   }
 
+  const handleImport = async (contacts: ContactFormData[]) => {
+    // L'importazione viene gestita nel componente ImportModal
+    // Questa funzione viene chiamata dopo l'importazione per aggiornare la lista
+    await fetchContacts()
+    await fetchCities()
+  }
+
   return (
     <>
       {/* Ambient Background Elements */}
@@ -147,7 +156,17 @@ export default function Home() {
             </div>
             <h1 className="font-bold text-lg tracking-tight text-slate-900 dark:text-white transition-colors duration-300">Contacts App</h1>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-4 py-2 glass-btn-secondary rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-white/60 dark:hover:bg-white/10 transition-all flex items-center gap-2"
+              title="Importa contatti"
+            >
+              <span className="material-symbols-outlined text-sm">upload_file</span>
+              <span className="hidden md:inline">Importa</span>
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
@@ -259,6 +278,17 @@ export default function Home() {
             setShowDeleteModal(false)
             setContactToDelete(null)
           }}
+        />
+      )}
+
+      {showImportModal && (
+        <ImportModal
+          onClose={() => {
+            setShowImportModal(false)
+            fetchContacts()
+            fetchCities()
+          }}
+          onImport={handleImport}
         />
       )}
     </>
