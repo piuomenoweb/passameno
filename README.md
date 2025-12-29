@@ -1,31 +1,79 @@
 # PassaMeno - Dashboard Contatti
 
-Dashboard per la gestione di contatti logistici con stile iOS 26 Liquid Glass.
+Dashboard moderna per la gestione di contatti logistici con design iOS 26 Liquid Glass e integrazione WhatsApp automatica.
 
-## Funzionalità
+## ✨ Funzionalità
 
-- ✅ Gestione completa contatti (CRUD)
-- ✅ Ricerca e filtri avanzati
-- ✅ Condivisione contatti via WhatsApp con messaggio preimpostato
-- ✅ Invio automatico WhatsApp con messaggio preimpostato
-- ✅ Design glassmorphism iOS 26 style
-- ✅ Responsive e ottimizzato per velocità
+- ✅ **Dashboard Contatti** - Gestione completa CRUD con design glassmorphism
+- ✅ **Ricerca in Tempo Reale** - Trova contatti istantaneamente
+- ✅ **Filtri Avanzati** - Per categoria e preferiti
+- ✅ **Condivisione WhatsApp** - Condividi contatti con messaggio preimpostato
+- ✅ **Invio WhatsApp Diretto** - Messaggio automatico con numero contatto
+- ✅ **Design Moderno** - Stile iOS 26 Liquid Glass con effetti glassmorphism
 
-## Setup
+## 🚀 Tech Stack
 
-### 1. Installazione Dipendenze
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: TailwindCSS con glassmorphism
+- **Database**: Supabase (PostgreSQL)
+- **Deploy**: Vercel
+- **Icons**: Material Symbols
 
-```bash
-npm install
-```
+## 📋 Prerequisiti
 
-### 2. Configurazione Supabase
+- Node.js 18+ installato
+- Account Supabase (gratuito)
+- Account GitHub
+- Account Vercel (gratuito)
 
-1. Crea un progetto su [Supabase](https://supabase.com)
-2. Esegui questo SQL nella SQL Editor:
+## 🛠️ Setup Locale
+
+1. **Clona il repository**
+   ```bash
+   git clone https://github.com/piuomenoweb/passameno.git
+   cd passameno
+   ```
+
+2. **Installa le dipendenze**
+   ```bash
+   npm install
+   ```
+
+3. **Configura variabili ambiente**
+   Crea file `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
+
+4. **Configura Supabase**
+   - Crea progetto su [Supabase](https://supabase.com)
+   - Esegui lo script SQL (vedi `SETUP.md`)
+   - Ottieni le credenziali API
+
+5. **Avvia sviluppo**
+   ```bash
+   npm run dev
+   ```
+   Apri [http://localhost:3000](http://localhost:3000)
+
+## 📚 Documentazione
+
+Vedi `SETUP.md per guida completa setup e configurazione.
+
+## 🚢 Deploy su Vercel
+
+1. Push codice su GitHub
+2. Importa progetto su [Vercel](https://vercel.com)
+3. Aggiungi variabili ambiente in Vercel Dashboard
+4. Deploy automatico!
+
+## 📝 Script SQL Supabase
+
+Esegui questo script nel SQL Editor di Supabase:
 
 ```sql
--- Tabella contatti
 CREATE TABLE contacts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
@@ -39,12 +87,12 @@ CREATE TABLE contacts (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Indici
 CREATE INDEX idx_contacts_phone ON contacts(phone);
 CREATE INDEX idx_contacts_category ON contacts(category);
 CREATE INDEX idx_contacts_favorite ON contacts(favorite);
 
--- Trigger per updated_at
+CREATE INDEX idx_contacts_name_search ON contacts USING gin(to_tsvector('italian', name));
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -56,7 +104,6 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_contacts_updated_at BEFORE UPDATE ON contacts
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Row Level Security
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all operations" ON contacts
@@ -65,27 +112,20 @@ USING (true)
 WITH CHECK (true);
 ```
 
-3. Copia `.env.local.example` in `.env.local` e inserisci le tue credenziali Supabase
+## 🔒 Sicurezza
 
-### 3. Avvio Sviluppo
+- File sensibili (`.env.local`, `credentials.txt`) sono nel `.gitignore`
+- Non committare mai credenziali nel codice
+- Usa variabili ambiente per tutte le chiavi API
 
-```bash
-npm run dev
-```
+## 📄 Licenza
 
-Apri [http://localhost:3000](http://localhost:3000)
+Questo progetto è privato.
 
-## Deploy su Vercel
+## 👤 Autore
 
-1. Push del codice su GitHub
-2. Connetti il repository a Vercel
-3. Aggiungi le variabili d'ambiente in Vercel Dashboard
-4. Deploy automatico!
+**piuomenoweb**
 
-## Funzionalità Future
+---
 
-- [ ] Integrazione con gestionale per data consegna
-- [ ] Notifiche automatiche WhatsApp
-- [ ] Import/Export CSV
-- [ ] Storico comunicazioni
-
+Made with ❤️ using Next.js and Supabase
