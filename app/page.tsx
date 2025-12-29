@@ -55,7 +55,10 @@ export default function Home() {
       if (favorite) params.append('favorite', 'true')
       if (city) params.append('city', city)
 
-      const res = await fetch(`/api/contacts?${params}`)
+      const queryString = params.toString()
+      const url = queryString ? `/api/contacts?${queryString}` : '/api/contacts'
+      
+      const res = await fetch(url)
       const json = await res.json()
       setContacts(json.data || [])
     } catch (error) {
@@ -135,7 +138,7 @@ export default function Home() {
             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30">
               <span className="material-symbols-outlined text-lg">contacts</span>
             </div>
-            <h1 className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Contacts App</h1>
+            <h1 className="font-bold text-lg tracking-tight text-slate-900 dark:text-white transition-colors duration-300">Contacts App</h1>
           </div>
           <ThemeToggle />
         </div>
@@ -146,10 +149,10 @@ export default function Home() {
         {/* Hero Section */}
         <div className="w-full max-w-3xl flex flex-col items-center text-center gap-6 mb-12">
           <div className="space-y-2">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white drop-shadow-sm">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white drop-shadow-sm transition-colors duration-300">
               Find your connections
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium transition-colors duration-300">
               Manage and reach out to your network in seconds.
             </p>
           </div>
@@ -164,7 +167,7 @@ export default function Home() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, tag, or number..."
-              className="glass-input w-full h-16 pl-14 pr-6 rounded-full text-lg placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-4 focus:ring-primary/20 focus:border-primary/50 transition-all shadow-sm group-hover:shadow-md outline-none"
+              className="glass-input w-full h-16 pl-14 pr-6 rounded-full text-lg placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-4 focus:ring-primary/20 focus:border-primary/50 transition-all duration-300 shadow-sm group-hover:shadow-md outline-none"
             />
             <div className="absolute inset-y-0 right-3 flex items-center">
               <button className="w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-primary hover:bg-white dark:hover:bg-white/20 transition-colors">
