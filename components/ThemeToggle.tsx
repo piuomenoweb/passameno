@@ -53,15 +53,18 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="w-10 h-10 flex items-center justify-center rounded-full glass-btn-secondary hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 group"
+      className="w-10 h-10 flex items-center justify-center rounded-full glass-btn-secondary hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 group relative overflow-hidden"
       title={theme === 'light' ? 'Attiva dark mode' : 'Attiva light mode'}
     >
       <span 
-        className={`material-symbols-outlined text-slate-700 dark:text-slate-300 transition-all duration-300 ${
+        className={`material-symbols-outlined text-slate-700 dark:text-slate-300 transition-all duration-500 ease-in-out relative z-10 ${
           theme === 'light' 
-            ? 'rotate-0 scale-100' 
-            : 'rotate-180 scale-100'
+            ? 'rotate-0 scale-100 opacity-100' 
+            : 'rotate-180 scale-100 opacity-100'
         }`}
+        style={{
+          transform: theme === 'light' ? 'rotate(0deg) scale(1)' : 'rotate(180deg) scale(1)',
+        }}
       >
         {theme === 'light' ? 'dark_mode' : 'light_mode'}
       </span>
